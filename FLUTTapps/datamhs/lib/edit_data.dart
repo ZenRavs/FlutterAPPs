@@ -25,10 +25,10 @@ class EditState extends State<EditData> {
       setState(() {
         mahasiswa = response;
       });
-    } catch (e) {}
+    } catch (ce) {}
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Error! $e'),
+        content: Text('Error!: '),
       ),
     );
   }

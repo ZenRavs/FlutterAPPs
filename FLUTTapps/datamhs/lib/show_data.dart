@@ -9,12 +9,17 @@ class ShowData extends StatefulWidget {
 }
 
 class ShowDataState extends State<ShowData> {
+  TextEditingController nimController = TextEditingController();
+  TextEditingController namaController = TextEditingController();
+  TextEditingController jurusanController = TextEditingController();
+  TextEditingController statusController = TextEditingController();
   final supabase = Supabase.instance.client;
   List<dynamic> mahasiswa = [];
 
   @override
   void initState() {
     super.initState();
+    retrieve();
   }
 
   void retrieve() async {
@@ -28,6 +33,65 @@ class ShowDataState extends State<ShowData> {
     }
   }
 
+  void edit(id) async {
+    final response =
+        await supabase.from('mahasiswa').select('*').eq('id', id).single();
+    nimController.text = response['nim'].toString();
+    namaController.text = response['nama'].toString();
+    jurusanController.text = response['jurusan'].toString();
+    statusController.text = response['status'].toString();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Data'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                controller: nimController,
+                decoration: InputDecoration(labelText: 'NIM'),
+              ),
+              TextField(
+                controller: namaController,
+                decoration: InputDecoration(labelText: 'Nama'),
+              ),
+              TextField(
+                controller: jurusanController,
+                decoration: InputDecoration(labelText: 'Jurusan'),
+              ),
+              TextField(
+                controller: statusController,
+                decoration: InputDecoration(labelText: 'Status'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () async {
+              // Perform update operation with updated values
+              await supabase.from('mahasiswa').update({
+                'nim': nimController.text,
+                'nama': namaController.text,
+                'jurusan': jurusanController.text,
+                'status': statusController.text,
+              }).eq('id', id);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Succes.'),
+                ),
+              );
+              controllerClear();
+              retrieve();
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void deleteRow(id) async {
     try {
       await supabase.from('mahasiswa').delete().eq('id', id);
@@ -35,6 +99,13 @@ class ShowDataState extends State<ShowData> {
     } on Exception catch (e) {
       print('Delete Failed! error: $e');
     }
+  }
+
+  void controllerClear() {
+    nimController.clear();
+    namaController.clear();
+    jurusanController.clear();
+    statusController.clear();
   }
 
   @override
@@ -124,16 +195,27 @@ class ShowDataState extends State<ShowData> {
                                 ),
                               ),
                               DataCell(
-                                IconButton(
-                                  onPressed: () {
-                                    deleteRow(e['id']);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Deleted.'),
-                                      ),
-                                    );
-                                  },
-                                  icon: Icon(Icons.delete),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        edit(e['id']);
+                                      },
+                                      icon: Icon(Icons.edit),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        deleteRow(e['id']);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Deleted.'),
+                                          ),
+                                        );
+                                      },
+                                      icon: Icon(Icons.delete),
+                                    ),
+                                  ],
                                 ),
                               )
                             ],

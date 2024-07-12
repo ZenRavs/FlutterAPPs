@@ -30,6 +30,7 @@ class HomeState extends State<Home> {
           'status': statusController.text
         },
       );
+      controllerClear();
     } on Exception catch (e) {
       print('Insert Failed! error: $e');
     }
@@ -109,8 +110,7 @@ class HomeState extends State<Home> {
                       if (jurusan == 'SI') {
                         jurusanToNim = 'A12.$nim';
                         save();
-                      }
-                      if (jurusan == 'TI') {
+                      } else if (jurusan == 'TI') {
                         jurusanToNim = 'A11.$nim';
                         save();
                       } else {
